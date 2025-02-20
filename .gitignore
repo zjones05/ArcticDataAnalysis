@@ -47,3 +47,8 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+
+seabird_mammal_raw_data.csv
+
+seabird_mammal_metadata.csv
