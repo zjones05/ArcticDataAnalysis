@@ -27,10 +27,7 @@ wide_data <- merge(data.table(date = full_dates), wide_data, by = "date",
                    all.x = TRUE)
 
 # Handle missing values (Choose one)
-wide_data[is.na(wide_data)] <- 0  # Option 1: Fill missing months with 0
-# wide_data <- na.locf(wide_data)  # Option 2: Forward-fill 
-                                   #(last observation carried forward)
-# wide_data <- na.approx(wide_data)  # Option 3: Linear interpolation
+wide_data[is.na(wide_data)] <- 0
 
 # Convert to zoo object (Now it is regular)
 zoo_obj <- zoo(wide_data[, -1, with = FALSE], order.by = wide_data$date)
@@ -60,42 +57,41 @@ zoo_obj <- zoo(wide_data[, -1, with = FALSE], order.by = wide_data$date)
 # Convert to mts (Ensure regular time steps: monthly frequency)
 mts_obj <- ts(coredata(zoo_obj), start = c(1993, 1), frequency = 12)
 
-plot(mts_obj[, "Adelie penguin"])
-
 # Convert mts to zoo for interpolation
 zoo_obj <- zoo(mts_obj, order.by = time(mts_obj))
 
 # Apply linear interpolation to each column
 zoo_interpolated <- na.approx(zoo_obj)
 
-#rounded mts
+#round interpolated abundances to whole numbers
 zoo_interpolated <- round(zoo_interpolated)
 
 # Convert back to mts after interpolation
 mts_interpolated <- ts(coredata(zoo_interpolated), start = c(1993, 1), frequency = 12)
 
-class(mts_interpolated)
-mts_interpolated[, "Antarctic petrel"]
-
-plot(mts_interpolated[, "Antarctic fur-seal"])
 
 #histogram
 hist(mts_interpolated[, "Adelie penguin"], 30)
 
-#differenced histogram
+#diff histogram
 hist(diff(mts_interpolated[, "Adelie penguin"]), 30)
 
-#Plot data stricly from 1993
+
+#Data strictly from 1995
 yearSection <- window(mts_interpolated, start = c(1995, 1), end = c(1995, 12))
 yearSection[, "Antarctic petrel"]
-plot(yearSection[, "Antarctic petrel"])
+yearSection[, "Antarctic tern"]
+plot(as.vector(yearSection[, "Antarctic petrel"]), 
+     as.vector(yearSection[, "Antarctic tern"]))
+?as.vector
 
 
-#pearson correlation1
+#pearson correlation
 correlation <- cor(mts_interpolated[, "Antarctic fur-seal"], 
                    mts_interpolated[, "Adelie penguin"], method = 'pearson')
-
-#pearson correlation2
-correlation <- cor(mts_interpolated[, "Antarctic petrel"], 
-                   mts_interpolated[, "Antarctic tern"], method = 'pearson')
 correlation
+
+#pearson correlation1
+correlation1 <- cor(mts_interpolated[, "Antarctic petrel"], 
+                   mts_interpolated[, "Antarctic tern"], method = 'pearson')
+correlation1
