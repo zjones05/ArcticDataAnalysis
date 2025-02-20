@@ -37,10 +37,7 @@ zoo_obj <- zoo(wide_data[, -1, with = FALSE], order.by = wide_data$date)
 
 # Convert to ts (If fully regular, i.e., all months filled)
 mts_obj <- ts(coredata(zoo_obj), start = c(1993, 1), frequency = 12)
-
 mts_obj
-
-
 
 # Ensure date column exists (First day of the month)
 df[, date := as.Date(paste(YEAR, MONTH, "01", sep = "-"))]  
@@ -65,18 +62,20 @@ mts_obj <- ts(coredata(zoo_obj), start = c(1993, 1), frequency = 12)
 
 plot(mts_obj[, "Adelie penguin"])
 
-
-
-
 # Convert mts to zoo for interpolation
 zoo_obj <- zoo(mts_obj, order.by = time(mts_obj))
 
 # Apply linear interpolation to each column
 zoo_interpolated <- na.approx(zoo_obj)
 
+#rounded mts
+zoo_interpolated <- round(zoo_interpolated)
+
 # Convert back to mts after interpolation
 mts_interpolated <- ts(coredata(zoo_interpolated), start = c(1993, 1), frequency = 12)
+
 class(mts_interpolated)
+mts_interpolated[, "Antarctic petrel"]
 
 plot(mts_interpolated[, "Antarctic fur-seal"])
 
@@ -86,37 +85,10 @@ hist(mts_interpolated[, "Adelie penguin"], 30)
 #differenced histogram
 hist(diff(mts_interpolated[, "Adelie penguin"]), 30)
 
-#scatter plot
-plot(mts_interpolated[, "Adelie penguin"], 
-     mts_interpolated[, "Antarctic fur-seal"])
-
-plot(mts_interpolated[, "Antarctic petrel"], 
-     mts_interpolated[, "Antarctic tern"])
-
-#diff scatter plot
-plot(diff(mts_interpolated[, "Adelie penguin"]), 
-     diff(mts_interpolated[, "Antarctic fur-seal"]))
-
-plot(diff(mts_interpolated[, "Antarctic petrel"]), 
-     diff(mts_interpolated[, "Antarctic tern"]))
-
-#scatter plot
-plot(mts_interpolated[, "Adelie penguin"], 
-     mts_interpolated[, "Antarctic fur-seal"])
-
-plot(mts_interpolated[, "Antarctic petrel"], 
-     mts_interpolated[, "Antarctic tern"])
-
-#diff scatter plot
-plot(diff(mts_interpolated[, "Adelie penguin"]), 
-     diff(mts_interpolated[, "Antarctic fur-seal"]))
-
-plot(diff(mts_interpolated[, "Antarctic petrel"]), 
-     diff(mts_interpolated[, "Antarctic tern"]))
-
 #Plot data stricly from 1993
-yearSection <- window(mts_interpolated, start = 1993, end = 1994)
-plot(yearSection[, "Antarctic petrel"], yearSection[, "Antarctic tern"])
+yearSection <- window(mts_interpolated, start = c(1995, 1), end = c(1995, 12))
+yearSection[, "Antarctic petrel"]
+plot(yearSection[, "Antarctic petrel"])
 
 
 #pearson correlation1
