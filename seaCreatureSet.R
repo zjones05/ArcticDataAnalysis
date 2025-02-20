@@ -46,7 +46,9 @@ agg_data <- df[, .(ABUNDANCE = sum(ABUNDANCE)), by = .(date, GENUS_SPECIES)]
 wide_data <- dcast(agg_data, date ~ GENUS_SPECIES, value.var = "ABUNDANCE", fill = 0)
 
 # Generate full sequence of monthly dates
-full_dates <- seq(from = as.Date("1993-01-01"), to = as.Date("2011-12-01"), by = "month")
+#full_dates <- seq(from = as.Date("1993-01-01"), to = as.Date("2011-12-01"), by = "month")
+full_dates <- seq(from = as.Date("1993-01-01"), to = as.Date("2011-12-01"), by = "year")
+
 
 # Merge full date range with dataset to fill missing months
 wide_data <- merge(data.table(date = full_dates), wide_data, by = "date", all.x = TRUE)
@@ -55,19 +57,19 @@ wide_data <- merge(data.table(date = full_dates), wide_data, by = "date", all.x 
 zoo_obj <- zoo(wide_data[, -1, with = FALSE], order.by = wide_data$date)
 
 # Convert to mts (Ensure regular time steps: monthly frequency)
-mts_obj <- ts(coredata(zoo_obj), start = c(1993, 1), frequency = 12)
+mts_obj <- ts(coredata(zoo_obj), start = c(1993, 1), frequency = 1)
 
 # Convert mts to zoo for interpolation
 zoo_obj <- zoo(mts_obj, order.by = time(mts_obj))
 
 # Apply linear interpolation to each column
-zoo_interpolated <- na.approx(zoo_obj)
+#zoo_interpolated <- na.approx(zoo_obj)
 
 #round interpolated abundances to whole numbers
-zoo_interpolated <- round(zoo_interpolated)
+#zoo_interpolated <- round(zoo_interpolated)
 
 # Convert back to mts after interpolation
-mts_interpolated <- ts(coredata(zoo_interpolated), start = c(1993, 1), frequency = 12)
+#mts_interpolated <- ts(coredata(zoo_interpolated), start = c(1993, 1), frequency = 12)
 
 
 #histogram
@@ -81,10 +83,13 @@ hist(diff(mts_interpolated[, "Adelie penguin"]), 30)
 yearSection <- window(mts_interpolated, start = c(1995, 1), end = c(1995, 12))
 yearSection[, "Antarctic petrel"]
 yearSection[, "Antarctic tern"]
-plot(as.vector(yearSection[, "Antarctic petrel"]), 
-     as.vector(yearSection[, "Antarctic tern"]))
-?as.vector
+plot(yearSection[, "Antarctic petrel"], type = "p")
 
+plot(as.vector(yearSection[, "Antarctic petrel"]))
+plot(as.vector(yearSection[, "Antarctic tern"]))
+
+mts_interpolated
+mts_obj
 
 #pearson correlation
 correlation <- cor(mts_interpolated[, "Antarctic fur-seal"], 
@@ -95,3 +100,13 @@ correlation
 correlation1 <- cor(mts_interpolated[, "Antarctic petrel"], 
                    mts_interpolated[, "Antarctic tern"], method = 'pearson')
 correlation1
+mts_obj[, "Antarctic petrel"]
+mts_interpolated
+mts_obj
+
+#most abundance below <50
+plot(mts_obj[, "Antarctic petrel"], type = "p")
+
+plot(mts_obj[, "Antarctic tern"], type = "p")
+plot(mts_obj[, "Adelie penguin"], type = "p")
+plot(mts_obj[, "Antarctic prion"], type = "p")
