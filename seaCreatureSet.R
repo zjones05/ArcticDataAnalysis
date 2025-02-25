@@ -1,13 +1,8 @@
 install.packages("zoo")
 install.packages("data.table")
-install.packages("tseries")
 require(zoo)
 require(data.table)
-require(tseries)
 
-#-----------------------------------------------------------------
-
-#INITIALIZATION & TIME SERIES CREATION
 #read in raw data (data.table)
 df <- fread("C:/Users/Me/Desktop/ArcticCreatureAnalysis/seabird_mammal_raw_data.csv")
 df
@@ -48,38 +43,43 @@ df[, date := as.Date(paste(YEAR, MONTH, "01", sep = "-"))]
 agg_data <- df[, .(ABUNDANCE = sum(ABUNDANCE)), by = .(date, GENUS_SPECIES)]
 
 # Reshape data to wide format (GENUS_SPECIES as columns)
-wide_data <- dcast(agg_data, date ~ GENUS_SPECIES, value.var = "ABUNDANCE", fill = 0)
+wide_data <- dcast(agg_data, date ~ GENUS_SPECIES, value.var = "ABUNDANCE", 
+                   fill = 0)
 
-# Generate full sequence of dates (years)
-#full_dates <- seq(from = as.Date("1993-01-01"), to = as.Date("2011-12-01"), by = "month")
-full_dates <- seq(from = as.Date("1993-01-01"), to = as.Date("2011-12-01"), by = "year")
-
+# Generate full sequence of monthly dates
+full_dates <- seq(from = as.Date("1993-01-01"), to = as.Date("2011-12-01"), 
+                  by = "month")
 
 # Merge full date range with dataset to fill missing months
 wide_data <- merge(data.table(date = full_dates), wide_data, by = "date", 
                    all.x = TRUE)
 
 # Convert to zoo object
-#zoo_obj <- zoo(wide_data[, -1, with = FALSE], order.by = wide_data$date)
+zoo_obj <- zoo(wide_data[, -1, with = FALSE], order.by = wide_data$date)
 
-# Convert to mts (Ensure regular time steps: monthly frequency)
-mts_obj <- ts(coredata(wide_data), start = c(1993, 1), frequency = 1)
+#Convert to mts (Ensure regular time steps: monthly frequency)
+mts_obj <- ts(coredata(zoo_obj), start = c(1993, 1), frequency = 12)
+
+# Convert mts to zoo for interpolation
+zoo_obj <- zoo(mts_obj, order.by = time(mts_obj))
 
 # Apply linear interpolation to each column
-mts_interpolated <- na.approx(mts_obj)
+zoo_interpolated <- na.approx(zoo_obj)
 
 #round interpolated abundances to whole numbers
-mtsInterpolated <- round(zoo_interpolated)
+zoo_interpolated <- round(zoo_interpolated)
 
 # Convert back to mts after interpolation
-#mts_interpolated <- ts(coredata(zoo_interpolated), start = c(1993, 1), frequency = 12)
+mts_interpolated <- ts(coredata(zoo_interpolated), start = c(1993, 1), 
+                       frequency = 12)
 
-#-----------------------------------------------------------------
 
-#PLOTTING AND ANALYSIS
+
+
+
+
 #histogram
-hist(mts_obj[, "Adelie penguin"], 30, )
-hist(mtsInterpolated[, "Adelie penguin"], 30)
+hist(mts_interpolated[, "Adelie penguin"], 30)
 
 #diff histogram
 hist(diff(mts_interpolated[, "Adelie penguin"]), 30)
@@ -113,7 +113,6 @@ mts_obj
 plot(mts_obj[, "Antarctic petrel"], type = "p")
 
 plot(mts_obj[, "Antarctic tern"], type = "p")
+mts_obj[, "Antarctic tern"]
 plot(mts_obj[, "Adelie penguin"], type = "p")
 plot(mts_obj[, "Antarctic prion"], type = "p")
-
-adf.test(mts_obj[, "Adelie penguin"])
