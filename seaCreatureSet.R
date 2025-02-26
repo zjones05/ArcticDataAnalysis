@@ -2,6 +2,8 @@ install.packages("zoo")
 install.packages("data.table")
 install.packages("tseries")
 install.packages("ggplot2")
+install.packages("arrow")
+require(arrow)
 require(tseries)
 require(zoo)
 require(data.table)
@@ -256,3 +258,15 @@ barplot(rankedData$Abundance,
        main = paste("Ranked Frequency Plot for 1996"),
        xlab = "Species", 
        ylab = "Abundance")
+
+
+#----------SIMULATION (IN PANDAS)----------
+#convert mts to data frame
+mts_df <- data.frame(time = time(mts_obj), coredata(mts_obj))
+
+#save as csv
+write.csv(mts_df, "mts_obj.csv", row.names = FALSE)
+
+# Save as Feather (for better performance)
+library(arrow)
+write_feather(mts_df, "mts_obj.feather")

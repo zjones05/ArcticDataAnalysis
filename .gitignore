@@ -52,3 +52,6 @@ rsconnect/
 seabird_mammal_raw_data.csv
 
 seabird_mammal_metadata.csv
+
+mts_obj.csv
+mts_obj.feather
