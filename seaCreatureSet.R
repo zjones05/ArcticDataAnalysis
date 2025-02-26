@@ -256,7 +256,3 @@ barplot(rankedData$Abundance,
        main = paste("Ranked Frequency Plot for 1996"),
        xlab = "Species", 
        ylab = "Abundance")
-
-
-#----------SIMULATION----------
-years <- c(1996:2000)
