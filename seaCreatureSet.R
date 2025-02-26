@@ -232,19 +232,23 @@ rownames(corrMatrixD) <- c("Adelie Penguin", "Antarctic Petrel",
 
 
 #----------RANKED FREQUENCY PLOT----------
-#choosing specific year of data
+#group desired species
 species <- c("Adelie penguin", "Antarctic petrel", "Antarctic prion",
              "Antarctic tern", "Black-Browed albatross", 
              "Black-Belled storm-petrel")
 
+#create mts object for a specific year
 dataSubset <- mts_obj[, species]
 yearData <- window(dataSubset, c(1996), end = c(1996))
 end(yearData)
 totalAbundances <- colSums(yearData, na.rm = TRUE)
 rankedData <- data.frame(Species = names(totalAbundances), 
                          Abundance = totalAbundances)
+
+#order species by greatest to least abundance
 rankedData <- rankedData[order(-rankedData$Abundance), ]
 
+#display ranked frequency plot
 barplot(rankedData$Abundance, 
        names.arg = rankedData$Species, 
        las = 1,            # Rotate labels
@@ -252,3 +256,7 @@ barplot(rankedData$Abundance,
        main = paste("Ranked Frequency Plot for 1996"),
        xlab = "Species", 
        ylab = "Abundance")
+
+
+#----------SIMULATION----------
+years <- c(1996:2000)
