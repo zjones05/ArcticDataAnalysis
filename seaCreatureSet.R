@@ -267,7 +267,13 @@ adf.test(diff(diff(mts_obj[, "Adelie penguin"])))
 #----------AR MODEL FITTING----------
 mts_frame <- data.frame(mts_obj)
 
-plot(mts_frame[["Adelie penguin"]], type = "l")
+plot(mts_frame[["Adelie.penguin"]], type = "l")
+plot(pacf(mts_frame[["Adelie.penguin"]], type = "l"))
+
+fit <- ar(mts_frame[["Adelie.penguin"]], method = "mle")
+fit
+
+
 
 
 fcFrame <- fread("C:/Users/Me/Desktop/ArcticDataAnalysis/Daily_Demand_Forecasting_Orders.csv")
