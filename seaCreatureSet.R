@@ -10,7 +10,7 @@ require(data.table)
 require(ggplot2)
 
 #read in raw data (data.table)
-df <- fread("C:/Users/Me/Desktop/ArcticCreatureAnalysis/seabird_mammal_raw_data.csv")
+df <- fread("C:/Users/Me/Desktop/ArcticDataAnalysis/seabird_mammal_raw_data.csv")
 df
 is.data.table(df)
 
@@ -259,14 +259,26 @@ barplot(rankedData$Abundance,
        xlab = "Species", 
        ylab = "Abundance")
 
+plot(diff(mts_obj[, "Adelie penguin"]), type = "p")
+adf.test(diff(diff(mts_obj[, "Adelie penguin"])))
 
-#----------SIMULATION (IN PANDAS)----------
-#convert mts to data frame
-mts_df <- data.frame(time = time(mts_obj), coredata(mts_obj))
 
-#save as csv
-write.csv(mts_df, "mts_obj.csv", row.names = FALSE)
 
-# Save as Feather (for better performance)
-library(arrow)
-write_feather(mts_df, "mts_obj.feather")
+#----------AR MODEL FITTING----------
+mts_frame <- data.frame(mts_obj)
+
+plot(mts_frame[["Adelie penguin"]], type = "l")
+
+
+fcFrame <- fread("C:/Users/Me/Desktop/ArcticDataAnalysis/Daily_Demand_Forecasting_Orders.csv")
+
+plot(fcFrame[["Fiscal sector orders"]], type = "l")
+plot(pacf(fcFrame[["Banking orders (2)"]])) #banking orders
+
+fit <- ar(fcFrame[["Banking orders (2)"]], method = "mle")
+fit
+
+#Autoregressive Integrated Moving Average of order 3 (ARIMA(3))
+est <- arima(x = fcFrame[["Banking orders (2)"]], order = c(3, 0, 0))
+plot(fcFrame[["Banking orders (2)"]], type = "l") #banking orders
+
