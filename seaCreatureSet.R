@@ -267,24 +267,52 @@ adf.test(diff(diff(mts_obj[, "Adelie penguin"])))
 #----------AR MODEL FITTING----------
 mts_frame <- data.frame(mts_obj)
 
-plot(mts_frame[["Adelie.penguin"]], type = "l")
-plot(pacf(mts_frame[["Adelie.penguin"]], type = "l"))
+#differencing to reach stationarity
+diffAntTern <- diff(mts_frame[["Antarctic.tern"]])
+            
+#normal plot
+plot(mts_frame[["Antarctic.tern"]], type = "p")
 
-fit <- ar(mts_frame[["Adelie.penguin"]], method = "mle")
-fit
+#diffed plot
+plot(diffAntTern)
+
+adf.test(mts_frame[["Antarctic.tern"]]) #adf on OG
+adf.test(diffAntTern) #adf on diffed
+
+#Contiinuing with diffed data:
+pacf(diffAntTern) #pacf plot
+acf(diffAntTern) #acf plot
+
+#Fit a moving average, MA(q), time series model to the data, by selecting the 
+#complexity via AIC.
+ma.est = arima(diffAntTern, order = c(0, 0, 1))
+ma.est
+
+#Fit an autoregression, AR(p), time series model to the data, by selecting the 
+#complexity via AIC.
+ar.est <- arima(diffAntTern, order = c(1, 0, 0))
+ar.est
+
+checkresiduals(ma.est) #check strength of residual autocorrelation
+
+#inspect model performance on training data to assess goodness of fit of our 
+#model to this data set
+acf(ma.est$residuals)
+
+#Ljung-Box test
+#Larger p-value means residual data is mainly noise (model captured ts well)
+Box.test(est$residuals, lag = 10, type = "Ljung", fitdf = 3)
 
 
+#----------FORECASTING (one step ahead)----------
+install.packages("forecast")
+require(forecast)
 
+#ma fitting plot (over diffed plot)
+plot(diffAntTern, type = "l")
+lines(fitted(ma.est, h=1), col = 2, lwd = 2)
 
-fcFrame <- fread("C:/Users/Me/Desktop/ArcticDataAnalysis/Daily_Demand_Forecasting_Orders.csv")
-
-plot(fcFrame[["Fiscal sector orders"]], type = "l")
-plot(pacf(fcFrame[["Banking orders (2)"]])) #banking orders
-
-fit <- ar(fcFrame[["Banking orders (2)"]], method = "mle")
-fit
-
-#Autoregressive Integrated Moving Average of order 3 (ARIMA(3))
-est <- arima(x = fcFrame[["Banking orders (2)"]], order = c(3, 0, 0))
-plot(fcFrame[["Banking orders (2)"]], type = "l") #banking orders
+#ar fitting plot (over diffed plot)
+plot(diffAntTern, type = "l")
+lines(fitted(ar.est, h=1), col = 3, lwd = 2)
 
