@@ -3,6 +3,8 @@ install.packages("data.table")
 install.packages("tseries")
 install.packages("ggplot2")
 install.packages("arrow")
+install.packages("forecast")
+require(forecast)
 require(arrow)
 require(tseries)
 require(zoo)
@@ -279,9 +281,17 @@ plot(diffAntTern)
 adf.test(mts_frame[["Antarctic.tern"]]) #adf on OG
 adf.test(diffAntTern) #adf on diffed
 
-#Contiinuing with diffed data:
+#Continuing with diffed data:
 pacf(diffAntTern) #pacf plot
 acf(diffAntTern) #acf plot
+
+
+#Fitting ARIMA model
+ar1.ma1.model = Arima(diffAntTern, order = c(1, 0, 1))
+
+acf(ar1.ma1.model$residuals)
+pacf(ar1.ma1.model$residuals)
+
 
 #Fit a moving average, MA(q), time series model to the data, by selecting the 
 #complexity via AIC.
@@ -292,6 +302,7 @@ ma.est
 #complexity via AIC.
 ar.est <- arima(diffAntTern, order = c(1, 0, 0))
 ar.est
+
 
 checkresiduals(ma.est) #check strength of residual autocorrelation
 
@@ -305,8 +316,7 @@ Box.test(est$residuals, lag = 10, type = "Ljung", fitdf = 3)
 
 
 #----------FORECASTING (one step ahead)----------
-install.packages("forecast")
-require(forecast)
+
 
 #ma fitting plot (over diffed plot)
 plot(diffAntTern, type = "l")
@@ -315,4 +325,3 @@ lines(fitted(ma.est, h=1), col = 2, lwd = 2)
 #ar fitting plot (over diffed plot)
 plot(diffAntTern, type = "l")
 lines(fitted(ar.est, h=1), col = 3, lwd = 2)
-
