@@ -272,22 +272,28 @@ mts_frame <- data.frame(mts_obj)
 #differencing to reach stationarity
 diffAntTern <- diff(mts_frame[["Antarctic.tern"]])
             
-#normal plot
+#undiffed plot
 plot(mts_frame[["Antarctic.tern"]], type = "p")
 
 #diffed plot
 plot(diffAntTern)
 
-adf.test(mts_frame[["Antarctic.tern"]]) #adf on OG
+adf.test(mts_frame[["Antarctic.tern"]]) #adf on undiffed
 adf.test(diffAntTern) #adf on diffed
 
-#Continuing with diffed data:
-pacf(diffAntTern) #pacf plot
-acf(diffAntTern) #acf plot
+pacf(diffAntTern) #diffed pacf plot
+acf(diffAntTern) #diffed acf plot
+
+pacf(mts_frame["Antarctic.tern"]) #undiffed pacf plot
+acf(mts_frame["Antarctic.tern"]) #undiffed acf plot
 
 
 #manual ARIMA
 ar1.ma1.model = Arima(diffAntTern, order = c(1, 0, 1))
+ar1.ma1.model
+
+#higher order ARIMA
+ar1.ma1.model = Arima(diffAntTern, order = c(5, 0, 5))
 ar1.ma1.model
 
 #auto-ARIMA
