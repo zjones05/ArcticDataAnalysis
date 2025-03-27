@@ -290,7 +290,6 @@ acf(diffAntTern) #acf plot
 ar1.ma1.model = Arima(diffAntTern, order = c(1, 0, 1))
 
 acf(ar1.ma1.model$residuals)
-pacf(ar1.ma1.model$residuals)
 
 
 #Fit a moving average, MA(q), time series model to the data, by selecting the 
