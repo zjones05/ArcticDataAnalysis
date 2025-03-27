@@ -286,10 +286,29 @@ pacf(diffAntTern) #pacf plot
 acf(diffAntTern) #acf plot
 
 
-#Fitting ARIMA model
+#manual ARIMA
 ar1.ma1.model = Arima(diffAntTern, order = c(1, 0, 1))
+ar1.ma1.model
+
+#auto-ARIMA
+auto.arima.est <- auto.arima(diffAntTern)
+auto.arima.est
 
 acf(ar1.ma1.model$residuals)
+pacf(ar1.ma1.model$residuals)
+
+checkresiduals(ar1.ma1.model)
+
+#forecast for manual ARIMA
+plot(diffAntTern, type = "l")
+lines(fitted(ar1.ma1.model, h=1), col = 4, lwd = 2) #ONE step
+
+plot(diffAntTern, type = "l")
+lines(fitted(ar1.ma1.model, h=3), col = 4, lwd = 2) #MULTIPLE steps
+
+#forecast for auto-ARIMA
+plot(diffAntTern, type = "l")
+lines(fitted(auto.arima.est, h=1), col = 4, lwd = 2) #ONE step
 
 
 #Fit a moving average, MA(q), time series model to the data, by selecting the 
