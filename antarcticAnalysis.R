@@ -349,3 +349,4 @@ lines(fitted(ma.est, h=1), col = 2, lwd = 2)
 #ar fitting plot (over diffed plot)
 plot(diffAntTern, type = "l")
 lines(fitted(ar.est, h=1), col = 3, lwd = 2)
+
