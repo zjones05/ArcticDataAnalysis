@@ -12,15 +12,17 @@ require(data.table)
 require(ggplot2)
 
 
-# Set the number of data points
+#----------CREATING TIME SERIES-----------
+#set the seed for reproducibility
+set.seed(123)
+
+#generate a time series of 10,000 random data points
 n <- 10000
+time_series <- ts(abs(rnorm(n)))
 
-# Generate a sequence of x values from 0 to 2π with n points
-x <- seq(0, 2 * pi, length.out = n)
+#display the first few points
+print(head(time_series))
 
-# Compute the sine of each x value
-y <- sin(x)
-
-# Plot the sine wave
-plot(x, y, type = "l", col = "blue", 
-     main = "Sine Wave with 10,000 Data Points", xlab = "x", ylab = "sin(x)")
+#plot the time series
+plot(time_series, main = "Random Time Series (10,000 Points)", col = "blue", 
+     type ="p")
