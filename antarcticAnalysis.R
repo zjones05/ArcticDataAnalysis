@@ -261,7 +261,7 @@ barplot(rankedData$Abundance,
        xlab = "Species", 
        ylab = "Abundance")
 
-plot(diff(mts_obj[, "Adelie penguin"]), type = "p")
+plot(diff(mts_obj[, "Adelie penguin"]), type = "l")
 adf.test(diff(diff(mts_obj[, "Adelie penguin"])))
 
 

@@ -18,11 +18,40 @@ set.seed(123)
 
 #generate a time series of 10,000 random data points
 n <- 10000
-time_series <- ts(abs(rnorm(n)))
+lambda <- 0.1
+time_series <- ts(abs(rexp(n, rate = lambda)))
 
-#display the first few points
-print(head(time_series))
+#adf test
+adf.test(time_series)
 
 #plot the time series
-plot(time_series, main = "Random Time Series (10,000 Points)", col = "blue", 
-     type ="p")
+plot(time_series, main = "Random Exponential Time Series (10,000 Points)", 
+     col = "blue", type ="l")
+
+#----------FIT MODELS----------
+# Apply AR Model
+ar_model <- arima(time_series, order = c(1, 0, 0))
+print(ar_model)
+
+#AR acf/pacf
+acf(ar_model)
+pacf(ar_model)
+
+# Apply MA Model
+ma_model <- arima(time_series, order = c(0, 0, 1))
+print(ma_model)
+
+# Apply ARMA Model
+arma_model <- arima(time_series, order = c(1, 0, 1))
+print(arma_model)
+
+# Apply ARMA + Linear Trend Model
+arma_linear_model <- arima(time_series, order = c(1, 0, 1), xreg = 1:n)
+print(arma_linear_model)
+
+# Apply Sine + Noise Model
+omega <- 0.05
+a <- 2
+sine_noise <- a * sin(omega * (1:n)) + rnorm(n)
+sin_noise_model <- arima(time_series, order = c(1, 0, 1), xreg = sine_noise)
+print(sin_noise_model)
