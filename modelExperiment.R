@@ -52,7 +52,26 @@ sine_noise <- a * sin(omega * (1:n)) + rnorm(n)
 sin_noise_model <- arima(time_series, order = c(1, 0, 1), xreg = sine_noise)
 sin_noise_model
 
-#ma < ar < armaLinear < arma < sine
+#AIC number: ma < ar < arma + linear < arma < sine
 #MA model has best fit
 
-#----------APPLYING TO TRAINING SET----------
+#----------TESTING SET AND TRAINING SET----------
+#set the training size (80% of the total data)
+trainSize <- round(0.8 * length(time_series))
+
+#split the time series into training and testing sets
+trainSet <- window(time_series, end = trainSize)
+testSet <- window(time_series, start = trainSize + 1)
+length(trainSet)
+length(testSet)
+
+#fit the MA model on the training set
+maModelTrain <- arima(trainSet, order = c(0, 0, 1))
+maModelTrain
+
+# Predict using the trained model
+predictions <- predict(maModelTrain, n.ahead = length(testSet))
+
+# Plot the predictions against the actual test data
+plot(testSet, col = "red", main = "Actual vs Predicted", ylab = "Values")
+lines(predictions$pred, col = "blue", lty = 2)
