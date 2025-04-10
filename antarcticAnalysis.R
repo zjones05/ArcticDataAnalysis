@@ -317,7 +317,7 @@ plot(diffAntTern, type = "l")
 lines(fitted(auto.arima.est, h=1), col = 4, lwd = 2) #ONE step
 
 
-#Fit a moving average, MA(q), time series model to the data, by selecting the 
+#Fit a MA(q) time series model to the data, by selecting the 
 #complexity via AIC.
 ma.est = arima(diffAntTern, order = c(0, 0, 1))
 ma.est
@@ -340,8 +340,6 @@ Box.test(est$residuals, lag = 10, type = "Ljung", fitdf = 3)
 
 
 #----------FORECASTING (one step ahead)----------
-
-
 #ma fitting plot (over diffed plot)
 plot(diffAntTern, type = "l")
 lines(fitted(ma.est, h=1), col = 2, lwd = 2)
