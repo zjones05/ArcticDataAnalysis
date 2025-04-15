@@ -5,6 +5,8 @@ install.packages("ggplot2")
 install.packages("arrow")
 install.packages("forecast")
 install.packages("reshape2")
+install.packages("Metrics")
+library(Metrics)
 require(forecast)
 require(arrow)
 require(tseries)
@@ -20,7 +22,7 @@ n <- 10000
 # ARMA component
 arma_part <- arima.sim(n = n, model = list(ar = 0.7, ma = -0.3))
 
-# Seasonal component (like cycles in weather or demand)
+# Seasonal component (like cycles in weather)
 seasonality <- sin(2 * pi * (1:n) / 200)  # cycle every 200 steps
 seasonality <- seasonality * 1.5          # stable amplitude
 
@@ -30,10 +32,8 @@ noise <- rnorm(n, mean = 0, sd = 0.5)
 # Combine to make the time series
 synthetic_ts <- arma_part + seasonality + noise
 
-# Plot it
-plot(synthetic_ts, type = "l", col = "steelblue",
-     main = "Stationary Real-World-Like Time Series",
-     ylab = "Value", xlab = "Time")
+#testing stationarity
+adf.test(synthetic_ts)
 
 #----------SPLITTING DATA INTO TRAINING AND TEST SETS----------
 train_size <- floor(0.8 * n)  # Training set (80%)
@@ -43,25 +43,23 @@ t_train <- 1:train_size  # Time for training data
 t_test <- (train_size + 1):n  # Time for test data
 
 #----------FIT MODELS ON TRAINING DATA----------
-
+#auto ARMA
+autoAr_model <- auto.arima(train_data)
+autoAr_model
 # AR Model (Auto-Regressive model)
 ar_model <- Arima(train_data, order = c(4, 0, 0))
 ar_forecast <- forecast(ar_model, h = length(test_data))  # Forecast for test data
 ar_model
 
 # MA Model (Moving Average model)
-ma_model <- arima(train_data, order = c(0, 0, 1))  # MA(1)
+ma_model <- Arima(train_data, order = c(0, 0, 1))  # MA(1)
 ma_forecast <- forecast(ma_model, h = length(test_data))  # Forecast for test data
 ma_model
 
-#auto ARMA
-autoAr_model <- auto.arima(train_data)
-autoAr_model
 # ARMA Model (Auto-Regressive Moving Average model)
-arma_model <- arima(train_data, order = c(4, 0, 1))  # ARMA(1, 1)
+arma_model <- Arima(train_data, order = c(4, 0, 1))  # ARMA(1, 1)
 arma_forecast <- forecast(arma_model, h = length(test_data))  # Forecast for test data
 arma_model
-auto.arima(train_data)
 
 # ARMA + kt Model (ARMA with quadratic trend)
 arma_kt_model <- lm(train_data ~ t_train + I(t_train^2))  # ARMA + quadratic trend (kt)
@@ -77,6 +75,10 @@ sin_model <- nls(train_data ~ a * sin(b * t_train_scaled + c),  # Fit sinusoidal
 sin_pred <- predict(sin_model, newdata = data.frame(t_train_scaled = t_test_scaled))  # Predict for test data
 
 #----------PLOT ACTUAL VS PREDICTED VALUES----------
+# Plot it
+plot(synthetic_ts, type = "l", col = "steelblue",
+     main = "Stationary Real-World-Like Time Series",
+     ylab = "Value", xlab = "Time")
 
 # AR Model forecast plot
 plot(t_test, test_data, type = "l", col = "black", main = "AR Model Forecast vs Test Data", ylab = "Value", xlab = "Time")
@@ -102,3 +104,19 @@ legend("topright", legend = c("Actual Data", "ARMA + kt Forecast"), col = c("bla
 plot(t_test, test_data, type = "l", col = "black", main = "Sinusoidal Model Forecast vs Test Data", ylab = "Value", xlab = "Time")
 lines(t_test, sin_pred, col = "red")
 legend("topright", legend = c("Actual Data", "Sinusoidal Forecast"), col = c("black", "red"), lty = 3)
+
+#MAE
+maeAR <- mae(t_test,ar_forecast$mean)
+maeAR
+
+maeMA <- mae(t_test,ma_forecast$mean)
+maeMA
+
+maeARMA <- mae(t_test,arma_forecast$mean)
+maeARMA
+
+maeARMA_kt <- mae(t_test,kt_pred)
+maeARMA_kt
+
+maeSIN <- mae(t_test,sin_pred)
+maeSIN
